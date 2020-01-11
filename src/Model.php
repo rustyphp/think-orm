@@ -611,9 +611,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
 
         // 模型更新
         $db = $this->db();
-        $db->startTrans();
-
-        try {
             $this->key = null;
             $where     = $this->getWhere();
 
@@ -631,16 +628,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 $this->autoRelationUpdate();
             }
 
-            $db->commit();
-
             // 更新回调
             $this->trigger('AfterUpdate');
 
             return true;
-        } catch (\Exception $e) {
-            $db->rollback();
-            throw $e;
-        }
     }
 
     /**
@@ -672,9 +663,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $allowFields = $this->checkAllowFields();
 
         $db = $this->db();
-        $db->startTrans();
-
-        try {
             $result = $db->strict(false)
                 ->field($allowFields)
                 ->replace($this->replace)
@@ -695,8 +683,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 $this->autoRelationInsert();
             }
 
-            $db->commit();
-
             // 标记数据已经存在
             $this->exists = true;
 
@@ -704,10 +690,6 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
             $this->trigger('AfterInsert');
 
             return true;
-        } catch (\Exception $e) {
-            $db->rollback();
-            throw $e;
-        }
     }
 
     /**
@@ -747,11 +729,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      */
     public function saveAll(iterable $dataSet, bool $replace = true): Collection
     {
-        $db = $this->db();
-        $db->startTrans();
-
-        try {
-            $pk = $this->getPk();
+           $pk = $this->getPk();
 
             if (is_string($pk) && $replace) {
                 $auto = true;
@@ -767,13 +745,7 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 }
             }
 
-            $db->commit();
-
             return $this->toCollection($result);
-        } catch (\Exception $e) {
-            $db->rollback();
-            throw $e;
-        }
     }
 
     /**
@@ -791,29 +763,19 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
         $where = $this->getWhere();
 
         $db = $this->db();
-        $db->startTrans();
-
-        try {
-            // 删除当前模型数据
-            $db->where($where)->delete();
+          // 删除当前模型数据
+         $db->where($where)->delete();
 
             // 关联删除
             if (!empty($this->relationWrite)) {
                 $this->autoRelationDelete();
             }
 
-            $db->commit();
-
             $this->trigger('AfterDelete');
-
             $this->exists   = false;
             $this->lazySave = false;
 
             return true;
-        } catch (\Exception $e) {
-            $db->rollback();
-            throw $e;
-        }
     }
 
     /**
