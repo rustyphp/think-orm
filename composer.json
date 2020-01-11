@@ -1,6 +1,6 @@
 {
-    "name": "topthink/think-orm",
-    "description": "think orm",
+    "name": "rustyphp/think-orm",
+    "description": "think orm no trans in Model",
     "keywords": [
         "orm",
         "database"
