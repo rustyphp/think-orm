@@ -117,6 +117,12 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
     protected $attrCase = PDO::CASE_LOWER;
 
     /**
+     *  字段属性驼峰命名
+     * @var bool
+     */
+    protected $attrIsCamelCase=true;
+
+    /**
      * 数据表信息
      * @var array
      */
@@ -914,10 +920,6 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
         }
 
         if ($limit) {
-            // 分批写入 自动启动事务支持
-            $this->startTrans();
-
-            try {
                 $array = array_chunk($dataSet, $limit, true);
                 $count = 0;
 
@@ -925,14 +927,6 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
                     $sql = $this->builder->insertAll($query, $item, $replace);
                     $count += $this->execute($query, $sql, $query->getBind());
                 }
-
-                // 提交事务
-                $this->commit();
-            } catch (\Exception | \Throwable $e) {
-                $this->rollback();
-                throw $e;
-            }
-
             return $count;
         }
 
