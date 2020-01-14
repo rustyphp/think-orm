@@ -117,12 +117,6 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
     protected $attrCase = PDO::CASE_LOWER;
 
     /**
-     *  字段属性驼峰命名
-     * @var bool
-     */
-    protected $attrIsCamelCase=true;
-
-    /**
      * 数据表信息
      * @var array
      */
@@ -699,7 +693,8 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
 
             // 预处理
             $this->PDOStatement = $this->linkID->prepare($sql);
-
+            //设置fetch method
+            $this->PDOStatement->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,'\\think\\model\\BaseInstance');
             // 参数绑定
             if ($procedure) {
                 $this->bindParam($bind);
@@ -1277,7 +1272,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             return $this->procedure();
         }
 
-        $result = $this->PDOStatement->fetchAll($this->fetchType);
+        $result = $this->PDOStatement->fetchAll();//$this->fetchType
 
         $this->numRows = count($result);
 
