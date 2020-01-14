@@ -5,6 +5,8 @@
  * @author lx
  */
 namespace think\model;
+use think\helper\Str;
+
 /**
  * Class BaseInstance
  *
@@ -21,7 +23,8 @@ final class BaseInstance {
         return $this->props[$name];
     }
 
-    public function __set($name, $val) {
+    public function __set(string $key, $val) {
+        $name = Str::camel($key);
         $this->props[$name]=$val;
     }
 }
