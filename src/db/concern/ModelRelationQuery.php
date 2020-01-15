@@ -426,7 +426,7 @@ trait ModelRelationQuery
 
         foreach ($resultSet as $key => &$result) {
             // 数据转换为模型对象
-            $this->resultToModel($result, $this->options, true, $withRelationAttr);
+            $this->resultToModel($result->getAttributes(), $this->options, true, $withRelationAttr);
         }
 
         if (!empty($this->options['with'])) {
@@ -438,7 +438,7 @@ trait ModelRelationQuery
             // 预载入
             $result->eagerlyResultSet($resultSet, $this->options['with_join'], $withRelationAttr, true, $this->options['with_cache'] ?? false);
         }
-
+        print_r($resultSet);die;
         // 模型数据集转换
         return $this->model->toCollection($resultSet);
     }
