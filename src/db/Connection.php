@@ -106,11 +106,11 @@ abstract class Connection
      */
     protected $config = [];
 
-    /**
-     * 缓存对象
-     * @var Cache
-     */
-    protected $cache;
+    ///**
+    // * 缓存对象
+    // * @var Cache
+    // */
+    //protected $cache;
 
     /**
      * 获取当前的builder实例对象
@@ -133,26 +133,26 @@ abstract class Connection
         $this->db = $db;
     }
 
-    /**
-     * 设置当前的缓存对象
-     * @access public
-     * @param CacheInterface $cache
-     * @return void
-     */
-    public function setCache(CacheInterface $cache)
-    {
-        $this->cache = $cache;
-    }
-
-    /**
-     * 获取当前的缓存对象
-     * @access public
-     * @return CacheInterface|null
-     */
-    public function getCache()
-    {
-        return $this->cache;
-    }
+    ///**
+    // * 设置当前的缓存对象
+    // * @access public
+    // * @param CacheInterface $cache
+    // * @return void
+    // */
+    //public function setCache(CacheInterface $cache)
+    //{
+    //    $this->cache = $cache;
+    //}
+    //
+    ///**
+    // * 获取当前的缓存对象
+    // * @access public
+    // * @return CacheInterface|null
+    // */
+    //public function getCache()
+    //{
+    //    return $this->cache;
+    //}
 
     /**
      * 获取数据库的配置参数
@@ -218,11 +218,12 @@ abstract class Connection
      */
     protected function getCacheKey(BaseQuery $query): string
     {
-        if (!empty($query->getOptions('key'))) {
-            $key = 'think:' . $this->getConfig('database') . '.' . $query->getTable() . '|' . $query->getOptions('key');
-        } else {
-            $key = $query->getQueryGuid();
+        if (empty($query->getOptions('key'))) {
+            return $query->getQueryGuid();
         }
+
+        $format = 'think:%s.%s|%s';
+        $key = sprintf($format, $this->getConfig('database') ,$query->getTable() , $query->getOptions('key'));
 
         return $key;
     }
@@ -239,16 +240,16 @@ abstract class Connection
         [$key, $expire, $tag] = $cache;
 
         if ($key instanceof CacheItem) {
-            $cacheItem = $key;
-        } else {
-            if (true === $key) {
-                $key = $this->getCacheKey($query);
-            }
-
-            $cacheItem = new CacheItem($key);
-            $cacheItem->expire($expire);
-            $cacheItem->tag($tag);
+            return $key;
         }
+
+        if (true === $key) {
+            $key = $this->getCacheKey($query);
+        }
+
+        $cacheItem = new CacheItem($key);
+        $cacheItem->expire($expire);
+        $cacheItem->tag($tag);
 
         return $cacheItem;
     }
@@ -261,6 +262,10 @@ abstract class Connection
     public function getNumRows(): int
     {
         return $this->numRows;
+    }
+
+    public function close(){
+        //TODO:close
     }
 
     /**

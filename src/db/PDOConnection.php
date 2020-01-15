@@ -19,6 +19,8 @@ use think\db\exception\BindParamException;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use think\db\exception\PDOException;
+use think\helper\Str;
+use think\model\BaseModel;
 
 /**
  * 数据库连接基础类
@@ -114,7 +116,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
      * 字段属性大小写
      * @var int
      */
-    protected $attrCase = PDO::CASE_LOWER;
+    protected $attrCase = PDO::CASE_NATURAL;
 
     /**
      * 数据表信息
@@ -258,6 +260,11 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
                 $info = array_change_key_case($info, CASE_UPPER);
                 break;
             case PDO::CASE_NATURAL:
+                $attributes = [];
+                foreach($info as $key=>$value){
+                    $attributes[Str::camel($key)]=$value;
+                }
+                break;
             default:
                 // 不做转换
         }
@@ -694,7 +701,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             // 预处理
             $this->PDOStatement = $this->linkID->prepare($sql);
             //设置fetch method
-            $this->PDOStatement->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,'\\think\\model\\BaseInstance');
+            $this->PDOStatement->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,'\\think\\model\\BaseModel');
             // 参数绑定
             if ($procedure) {
                 $this->bindParam($bind);
@@ -799,7 +806,8 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
                 return $this->builder->select($query, true);
             });
 
-            $result = $resultSet[0] ?? [];
+            $obj = $resultSet[0] ?? [];
+            $result=$obj && $obj instanceof BaseModel ? $obj->getAttributes() : $obj;
         }
 
         return $result;
