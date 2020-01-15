@@ -15,6 +15,7 @@ namespace think\db;
 use Closure;
 use PDO;
 use think\db\exception\DbException as Exception;
+use think\helper\Str;
 
 /**
  * Db Builder
@@ -146,37 +147,38 @@ abstract class Builder
         $result = [];
 
         foreach ($data as $key => $val) {
-            $item = $this->parseKey($query, $key, true);
+            $field = Str::snake($key);
+            $item = $this->parseKey($query, $field, true);
 
             if ($val instanceof Raw) {
                 $result[$item] = $val->getValue();
                 continue;
-            } elseif (!is_scalar($val) && (in_array($key, (array) $query->getOptions('json')) || 'json' == $query->getFieldType($key))) {
+            } elseif (!is_scalar($val) && (in_array($field, (array) $query->getOptions('json')) || 'json' == $query->getFieldType($field))) {
                 $val = json_encode($val);
             }
 
-            if (false !== strpos($key, '->')) {
-                [$key, $name]  = explode('->', $key, 2);
-                $item          = $this->parseKey($query, $key);
-                $result[$item] = 'json_set(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $key . '->' . $name, $val, $bind) . ')';
-            } elseif (false === strpos($key, '.') && !in_array($key, $fields, true)) {
+            if (false !== strpos($field, '->')) {
+                [$field, $name]  = explode('->', $field, 2);
+                $item          = $this->parseKey($query, $field);
+                $result[$item] = 'json_set(' . $item . ', \'$.' . $name . '\', ' . $this->parseDataBind($query, $field . '->' . $name, $val, $bind) . ')';
+            } elseif (false === strpos($field, '.') && !in_array($field, $fields, true)) {
                 if ($options['strict']) {
-                    throw new Exception('fields not exists:[' . $key . ']');
+                    throw new Exception('fields not exists:[' . $field . ']');
                 }
             } elseif (is_null($val)) {
                 $result[$item] = 'NULL';
             } elseif (is_array($val) && !empty($val)) {
                 switch (strtoupper($val[0])) {
-                    case 'INC':
-                        $result[$item] = $item . ' + ' . floatval($val[1]);
-                        break;
-                    case 'DEC':
-                        $result[$item] = $item . ' - ' . floatval($val[1]);
-                        break;
+                case 'INC':
+                    $result[$item] = $item . ' + ' . floatval($val[1]);
+                    break;
+                case 'DEC':
+                    $result[$item] = $item . ' - ' . floatval($val[1]);
+                    break;
                 }
             } elseif (is_scalar($val)) {
                 // 过滤非标量数据
-                $result[$item] = $this->parseDataBind($query, $key, $val, $bind);
+                $result[$item] = $this->parseDataBind($query, $field, $val, $bind);
             }
         }
 
@@ -727,9 +729,9 @@ abstract class Builder
         }
 
         return $key . ' ' . substr($exp, 0, -4)
-        . $this->parseDateTime($query, $value[0], $field, $bindType)
-        . ' AND '
-        . $this->parseDateTime($query, $value[1], $field, $bindType);
+            . $this->parseDateTime($query, $value[0], $field, $bindType)
+            . ' AND '
+            . $this->parseDateTime($query, $value[1], $field, $bindType);
 
     }
 

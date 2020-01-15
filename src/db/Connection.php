@@ -133,26 +133,26 @@ abstract class Connection
         $this->db = $db;
     }
 
-    ///**
-    // * 设置当前的缓存对象
-    // * @access public
-    // * @param CacheInterface $cache
-    // * @return void
-    // */
-    //public function setCache(CacheInterface $cache)
-    //{
-    //    $this->cache = $cache;
-    //}
-    //
-    ///**
-    // * 获取当前的缓存对象
-    // * @access public
-    // * @return CacheInterface|null
-    // */
-    //public function getCache()
-    //{
-    //    return $this->cache;
-    //}
+    /**
+     * 设置当前的缓存对象
+     * @access public
+     * @param CacheInterface $cache
+     * @return void
+     */
+    public function setCache(CacheInterface $cache)
+    {
+        $this->cache = $cache;
+    }
+
+    /**
+     * 获取当前的缓存对象
+     * @access public
+     * @return CacheInterface|null
+     */
+    public function getCache()
+    {
+        return $this->cache;
+    }
 
     /**
      * 获取数据库的配置参数
