@@ -92,7 +92,7 @@ trait ResultOperation
         }
 
         // 返回Collection对象
-        $resultSet = new Collection($resultSet);
+        //$resultSet = new Collection($resultSet);
     }
 
     /**

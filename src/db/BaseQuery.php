@@ -1097,7 +1097,7 @@ abstract class BaseQuery
         // 数据列表读取后的处理
         if (!empty($this->model)) {
             // 生成模型对象
-            $resultSet = $this->resultSetToModelCollection($resultSet);
+            //$resultSet = $this->resultSetToModelCollection($resultSet);
         } else {
             $this->resultSet($resultSet);
         }

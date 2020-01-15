@@ -724,10 +724,10 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
      * @access public
      * @param iterable $dataSet 数据
      * @param boolean  $replace 是否自动识别更新和写入
-     * @return Collection
-     * @throws \Exception
+     *
+     * @return array
      */
-    public function saveAll(iterable $dataSet, bool $replace = true): Collection
+    public function saveAll(iterable $dataSet, bool $replace = true)
     {
            $pk = $this->getPk();
 
@@ -745,7 +745,8 @@ abstract class Model implements JsonSerializable, ArrayAccess, Arrayable, Jsonab
                 }
             }
 
-            return $this->toCollection($result);
+        return $result;
+            //return $this->toCollection($result);
     }
 
     /**
