@@ -28,6 +28,9 @@ use think\model\BaseModel;
 abstract class PDOConnection extends Connection implements ConnectionInterface
 {
     const PARAM_FLOAT = 21;
+    const FETCH_ASSOC=2;
+    const FETCH_CLASS=1;
+
 
     /**
      * 数据库连接参数配置
@@ -110,7 +113,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
      * 查询结果类型
      * @var int
      */
-    protected $fetchType = PDO::FETCH_ASSOC;
+    protected $fetchType = self::FETCH_ASSOC;
 
     /**
      * 字段属性大小写
@@ -599,7 +602,8 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
         $this->queryPDOStatement($query, $sql, $bind);
 
         // 返回结果集
-        while ($result = $this->PDOStatement->fetch($this->fetchType)) {
+        $fetchStyle = static::FETCH_ASSOC !== $this->fetchType?null:$this->fetchType;
+        while ($result = $this->PDOStatement->fetch($fetchStyle)) {
             if ($model) {
                 yield $model->newInstance($result, $condition);
             } else {
@@ -701,7 +705,11 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             // 预处理
             $this->PDOStatement = $this->linkID->prepare($sql);
             //设置fetch method
-            $this->PDOStatement->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,'\\think\\model\\BaseModel');
+            if(static::FETCH_CLASS === $this->fetchType){
+                $this->PDOStatement->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,'\\think\\model\\BaseModel');
+            }
+
+
             // 参数绑定
             if ($procedure) {
                 $this->bindParam($bind);
@@ -1280,7 +1288,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             return $this->procedure();
         }
 
-        $result = $this->PDOStatement->fetchAll();//$this->fetchType
+        $result = $this->PDOStatement->fetchAll($this->fetchType);
 
         $this->numRows = count($result);
 
