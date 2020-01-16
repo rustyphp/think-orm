@@ -28,9 +28,6 @@ use think\model\BaseModel;
 abstract class PDOConnection extends Connection implements ConnectionInterface
 {
     const PARAM_FLOAT = 21;
-    const FETCH_ASSOC=2;
-    const FETCH_CLASS=1;
-
 
     /**
      * 数据库连接参数配置
@@ -113,7 +110,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
      * 查询结果类型
      * @var int
      */
-    protected $fetchType = self::FETCH_ASSOC;
+    protected $fetchType = PDO::FETCH_ASSOC;
 
     /**
      * 字段属性大小写
@@ -256,20 +253,20 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
     {
         // 字段大小写转换
         switch ($this->attrCase) {
-            case PDO::CASE_LOWER:
-                $info = array_change_key_case($info);
-                break;
-            case PDO::CASE_UPPER:
-                $info = array_change_key_case($info, CASE_UPPER);
-                break;
-            case PDO::CASE_NATURAL:
-                $attributes = [];
-                foreach($info as $key=>$value){
-                    $attributes[Str::camel($key)]=$value;
-                }
-                break;
-            default:
-                // 不做转换
+        case PDO::CASE_LOWER:
+            $info = array_change_key_case($info);
+            break;
+        case PDO::CASE_UPPER:
+            $info = array_change_key_case($info, CASE_UPPER);
+            break;
+        case PDO::CASE_NATURAL:
+            $attributes = [];
+            foreach($info as $key=>$value){
+                $attributes[Str::camel($key)]=$value;
+            }
+            break;
+        default:
+            // 不做转换
         }
 
         return $info;
@@ -602,8 +599,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
         $this->queryPDOStatement($query, $sql, $bind);
 
         // 返回结果集
-        $fetchStyle = static::FETCH_ASSOC !== $this->fetchType?null:$this->fetchType;
-        while ($result = $this->PDOStatement->fetch($fetchStyle)) {
+        while ($result = $this->PDOStatement->fetch($this->fetchType)) {
             if ($model) {
                 yield $model->newInstance($result, $condition);
             } else {
@@ -705,11 +701,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             // 预处理
             $this->PDOStatement = $this->linkID->prepare($sql);
             //设置fetch method
-            if(static::FETCH_CLASS === $this->fetchType){
-                $this->PDOStatement->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,'\\think\\model\\BaseModel');
-            }
-
-
+            $this->PDOStatement->setFetchMode(PDO::FETCH_CLASS|PDO::FETCH_PROPS_LATE,'\\think\\model\\BaseModel');
             // 参数绑定
             if ($procedure) {
                 $this->bindParam($bind);
@@ -931,13 +923,13 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
         }
 
         if ($limit) {
-                $array = array_chunk($dataSet, $limit, true);
-                $count = 0;
+            $array = array_chunk($dataSet, $limit, true);
+            $count = 0;
 
-                foreach ($array as $item) {
-                    $sql = $this->builder->insertAll($query, $item, $replace);
-                    $count += $this->execute($query, $sql, $query->getBind());
-                }
+            foreach ($array as $item) {
+                $sql = $this->builder->insertAll($query, $item, $replace);
+                $count += $this->execute($query, $sql, $query->getBind());
+            }
             return $count;
         }
 
@@ -1197,8 +1189,8 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
 
             // 判断占位符
             $sql = is_numeric($key) ?
-            substr_replace($sql, $value, strpos($sql, '?'), 1) :
-            substr_replace($sql, $value, strpos($sql, ':' . $key), strlen(':' . $key));
+                substr_replace($sql, $value, strpos($sql, '?'), 1) :
+                substr_replace($sql, $value, strpos($sql, ':' . $key), strlen(':' . $key));
         }
 
         return rtrim($sql);
@@ -1288,7 +1280,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             return $this->procedure();
         }
 
-        $result = $this->PDOStatement->fetchAll($this->fetchType);
+        $result = $this->PDOStatement->fetchAll();//$this->fetchType
 
         $this->numRows = count($result);
 
