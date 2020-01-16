@@ -438,9 +438,9 @@ trait ModelRelationQuery
             // 预载入
             $result->eagerlyResultSet($resultSet, $this->options['with_join'], $withRelationAttr, true, $this->options['with_cache'] ?? false);
         }
-        print_r($resultSet);die;
+        return $resultSet;
         // 模型数据集转换
-        return $this->model->toCollection($resultSet);
+        //return $this->model->toCollection($resultSet);
     }
 
     /**

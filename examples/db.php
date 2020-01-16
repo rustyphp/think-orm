@@ -29,4 +29,4 @@ Db::setConfig([
 ]);
 // 数据库配置信息设置（全局有效）
 $result=Db::table('admin_auth_rule')->where('group_id', 1)->select();
-print_r($result);die;
+print_r($result);

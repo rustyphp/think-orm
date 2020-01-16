@@ -1080,7 +1080,7 @@ abstract class BaseQuery
      * @throws ModelNotFoundException
      * @throws DataNotFoundException
      */
-    public function select($data = null): Collection
+    public function select($data = null)
     {
         if (!is_null($data)) {
             // 主键条件分析
