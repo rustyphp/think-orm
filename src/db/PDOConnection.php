@@ -807,7 +807,7 @@ abstract class PDOConnection extends Connection implements ConnectionInterface
             });
 
             $obj = $resultSet[0] ?? [];
-            $result=$obj && $obj instanceof BaseModel ? $obj->getAttributes() : $obj;
+            $result=$obj && $obj instanceof BaseModel ? $obj->toArray() : $obj;
         }
 
         return $result;

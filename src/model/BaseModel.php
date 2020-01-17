@@ -1,6 +1,7 @@
 <?php
 namespace think\model;
 
+use think\contract\Arrayable;
 use think\helper\Str;
 
 /**
@@ -8,7 +9,7 @@ use think\helper\Str;
  *
  * @package think\model
  */
-final class BaseModel {
+final class BaseModel implements Arrayable {
     /**
      * @var array $attrs
      */
@@ -42,14 +43,14 @@ final class BaseModel {
     /**
      * @return array
      */
-    public function getAttributes() : array {
+    public function toArray() : array {
         return $this->attrs;
     }
 
     /**
      * @return array
      */
-    public function getFields():array {
+    public function getFields() : array {
         $data=[];
         foreach ($this->attrs as $name=>$value) {
             $data[Str::snake($name)]=$value;
