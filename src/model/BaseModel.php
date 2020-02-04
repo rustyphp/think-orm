@@ -37,7 +37,9 @@ final class BaseModel implements Arrayable {
      */
     public function __set(string $key, $val) {
         $name=Str::camel($key);
-        $this->attrs[$name]=$val;
+        //js MAX_SAFE_INTEGER = 9007199254740991
+        $this->attrs[$name]=$val > 9007199254740991 ? '' . $val : $val;
+
     }
 
     /**
